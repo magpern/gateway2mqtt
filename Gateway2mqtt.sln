@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Gateway2mqtt.Extentions", "Gateway2mqtt.Extentions\Gateway2mqtt.Extentions.vbproj", "{21420533-0612-4C17-A762-4FC7CB83BCD4}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RFLinkAdapter", "Adapters\RFLinkAdapter\RFLinkAdapter.vbproj", "{9BFCE62E-8EF3-42D5-8E64-8B36A458C966}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "HomeAssistantBinder", "Binders\HomeAssistantBinder\HomeAssistantBinder.vbproj", "{5E0AD19E-1612-4FB8-BBEE-A4FB9C0544DB}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Gateway2mqtt", "Gateway2mqtt\Gateway2mqtt.vbproj", "{5DC6C21D-B69D-4064-9CAE-33BF8B0854E7}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RFLinkAdapter.Test", "UnitTests\RFLinkAdapter.Test\RFLinkAdapter.Test.vbproj", "{CE371EC1-C9E3-47A7-AF83-C4104780F7EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{21420533-0612-4C17-A762-4FC7CB83BCD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21420533-0612-4C17-A762-4FC7CB83BCD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21420533-0612-4C17-A762-4FC7CB83BCD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21420533-0612-4C17-A762-4FC7CB83BCD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BFCE62E-8EF3-42D5-8E64-8B36A458C966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BFCE62E-8EF3-42D5-8E64-8B36A458C966}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BFCE62E-8EF3-42D5-8E64-8B36A458C966}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BFCE62E-8EF3-42D5-8E64-8B36A458C966}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E0AD19E-1612-4FB8-BBEE-A4FB9C0544DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E0AD19E-1612-4FB8-BBEE-A4FB9C0544DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E0AD19E-1612-4FB8-BBEE-A4FB9C0544DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E0AD19E-1612-4FB8-BBEE-A4FB9C0544DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DC6C21D-B69D-4064-9CAE-33BF8B0854E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DC6C21D-B69D-4064-9CAE-33BF8B0854E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DC6C21D-B69D-4064-9CAE-33BF8B0854E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DC6C21D-B69D-4064-9CAE-33BF8B0854E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE371EC1-C9E3-47A7-AF83-C4104780F7EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE371EC1-C9E3-47A7-AF83-C4104780F7EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE371EC1-C9E3-47A7-AF83-C4104780F7EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE371EC1-C9E3-47A7-AF83-C4104780F7EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
