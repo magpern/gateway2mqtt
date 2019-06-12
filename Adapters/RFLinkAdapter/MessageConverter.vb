@@ -81,6 +81,7 @@ Public Class MessageConverter
                             }
                         resultOut = New List(Of Dictionary(Of String, String)) From {dataOut}
                     Else
+                        Dim timestamp = (Date.UtcNow - New DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds
                         For Each key As KeyValuePair(Of String, String) In d
                             Dim val = key.Value
                             Dim keymod As String
@@ -98,12 +99,12 @@ Public Class MessageConverter
                                 {"param", keymod},
                                 {"payload", val},
                                 {"qos", 1},
-                                {"timestamp", (Date.UtcNow - New DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds}
+                                {"timestamp", timestamp}
                                 }
                             If resultOut Is Nothing Then
                                 resultOut = New List(Of Dictionary(Of String, String)) From {dataOut}
                             Else
-                                resultOut.Append(dataOut)
+                                resultOut.Add(dataOut)
                             End If
                         Next
                     End If

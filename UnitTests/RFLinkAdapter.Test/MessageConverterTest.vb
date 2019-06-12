@@ -70,7 +70,7 @@ Public Class MessageConverterTest
     End Sub
 
     <TestCase>
-    Public Sub Temp_and_Humidity_message_from_RFLink_to_mqtt2gateway()
+    Public Sub Temp_and_Humidity_message_from_RFLink_to_mqtt2gateway_json()
         'Arrange
         'Setup of Shared/Static objects in MessageConverter is made in <SetUp>
         Const message = "20;3D;Alecto V1;ID=2000;TEMP=0011;HUM=61;"
@@ -78,13 +78,34 @@ Public Class MessageConverterTest
         dim result = MessageConverter.MessageToObject(message)
 
         'Assess
+        MessageConverter.Config.mqtt_json.Should.BeTrue
         result.Count.Should.Be(1)
         result(0)("device_id").should.Be("2000")
         result(0)("payload").Should.Contain("1.7").And.Contain("61")
     End Sub
 
     <TestCase>
-    Public Sub Switch_message_from_RFLink_to_mqtt2gateway()
+    Public Sub Temp_and_Humidity_message_from_RFLink_to_mqtt2gateway_no_json()
+        'Arrange
+        'Setup of Shared/Static objects in MessageConverter is made in <SetUp>
+        Dim cnf = Mock.Get(MessageConverter.Config)
+        cnf.Setup(Function(s) s.mqtt_json).Returns(False)
+        
+        Const message = "20;3D;Alecto V1;ID=2000;TEMP=0011;HUM=61;"
+        'Act
+        dim result = MessageConverter.MessageToObject(message)
+
+        'Assess
+        MessageConverter.Config.mqtt_json.Should.BeFalse 
+        result.Count.Should.Be(2)
+        result(0)("device_id").should.Be("2000")
+        result(0)("payload").Should.Contain("1.7")
+        result(1)("payload").Should.Contain("61")
+        result(0)("payload").Should.NotContain("message")
+    End Sub
+    
+    <TestCase>
+    Public Sub Switch_message_from_RFLink_to_mqtt2gateway_json()
         'Arrange
         'Setup of Shared/Static objects in MessageConverter is made in <SetUp>
         Const message = "20;06;Kaku;ID=41;SWITCH=1;CMD=ON;"
@@ -95,6 +116,23 @@ Public Class MessageConverterTest
         result.Count.Should.Be(1)
         result(0)("device_id").should.Be("41")
         result(0)("payload").Should.Contain("CMD").And.Contain("ON")
+    End Sub
+    
+    <TestCase>
+    Public Sub Switch_message_from_RFLink_to_mqtt2gateway_no_json()
+        'Arrange
+        'Setup of Shared/Static objects in MessageConverter is made in <SetUp>
+        Dim cnf = Mock.Get(MessageConverter.Config)
+        cnf.Setup(Function(s) s.mqtt_json).Returns(False)
+        
+        Const message = "20;06;Kaku;ID=41;SWITCH=1;CMD=ON;"
+        'Act
+        dim result = MessageConverter.MessageToObject(message)
+
+        'Assess
+        result.Count.Should.Be(1)
+        result(0)("device_id").should.Be("41")
+        result(0)("payload").Should.Contain("ON")
     End Sub
     
     <TestCase>
