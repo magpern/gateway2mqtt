@@ -148,7 +148,7 @@ Public Class MessageConverter
             Next
             Return vv
         Else
-            Return String.Empty
+            Return value
         End If
 
     End Function
