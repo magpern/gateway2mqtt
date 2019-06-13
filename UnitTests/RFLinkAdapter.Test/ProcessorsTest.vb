@@ -49,10 +49,10 @@ Public Class ProcessorsTest
         'Arrange
         'Act
         'assert
-        Processors.Shex2dec("1000").Should.be("4096")
-        Processors.Shex2dec("FFFF").Should.be("-32767")
-        Processors.Shex2dec("8000").Should.be("0")
-        Processors.Shex2dec("KABA").Should.be("KABA")
+        Processors.SignedHex2dec("1000").Should.be("4096")
+        Processors.SignedHex2dec("FFFF").Should.be("-32767")
+        Processors.SignedHex2dec("8000").Should.be("0")
+        Processors.SignedHex2dec("KABA").Should.be("KABA")
     End Sub
 
     <TestCase>
@@ -73,6 +73,7 @@ Public Class ProcessorsTest
         Processors.Div10("10").Should.be("1")
         Processors.Div10("120").Should.be("12")
         Processors.Div10("124").Should.Be($"12{sep}4")
+        Processors.Div10("TEST").Should.be("TEST<")
     End Sub
 
     <TestCase>

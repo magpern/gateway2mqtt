@@ -1,8 +1,8 @@
 ﻿
 Imports System.Globalization
 
-Public Class Processors
-    Public Shared CardinalPtsMapping As New Dictionary(Of Integer, String) From {
+Public MustInherit Class Processors
+    Private Shared ReadOnly CardinalPtsMapping As New Dictionary(Of Integer, String) From {
         {0, "N"},
         {1, "NNE"},
         {2, "NE"},
@@ -52,9 +52,9 @@ Public Class Processors
         {Enumerable.Range(88, 1000 - 88), "STORM"}
     }
 
-    Shared Function Shex2dec(ByVal value As String) As String
+    Shared Function SignedHex2dec(value As String) As String
         Try
-            Dim val = Convert.ToInt32(value, 16)
+            Dim val As Integer = Convert.ToInt32(value, 16)
 
             If val >= 32768 Then
                 val = -1 * (val - 32768)
@@ -62,40 +62,36 @@ Public Class Processors
 
             Return val.ToString("G", CultureInfo.InvariantCulture)
         Catch
+            Return value
         End Try
-
-        Return value
     End Function
 
-    Shared Function Hex2dec(ByVal value As String) As String
+    Shared Function Hex2dec(value As String) As String
         Try
             Return Convert.ToInt32(value, 16).ToString("G", CultureInfo.InvariantCulture)
         Catch
+            Return value
         End Try
-
-        Return value
     End Function
 
     'This function is really useless, but kept for compatibility
-    Shared Function Str2dec(ByVal value As String) As String
+    Shared Function Str2dec(value As String) As String
         Try
             Return Convert.ToInt32(value).ToString("G", CultureInfo.InvariantCulture)
         Catch
+            Return value
         End Try
-
-        Return value
     End Function
 
-    Shared Function Div10(ByVal value As String) As String
+    Shared Function Div10(value As String) As String
         Try
             Return (Convert.ToDouble(value) / 10).ToString("G", CultureInfo.InvariantCulture)
         Catch
+            Return value
         End Try
-
-        Return value
     End Function
 
-    Shared Function Dir2deg(ByVal value As String) As String
+    Shared Function Dir2deg(value As String) As String
         Try
             'Definition of direction is
             'Wind direction (integer value from 0-15) reflecting 0-360 degrees in 22.5 degree steps
@@ -112,7 +108,7 @@ Public Class Processors
 
     End Function
 
-    Shared Function Dir2Car(ByVal value As String) As String
+    Shared Function Dir2Car(value As String) As String
         Try
             Return CardinalPtsMapping(Convert.ToInt32(value))
         Catch
@@ -121,26 +117,16 @@ Public Class Processors
 
     End Function
 
-    Shared Function Uv2Level(ByVal value As String) As String
-        Try
-            Return UvMapping(Convert.ToInt32(value))
-        Catch
-        End Try
-
-        Return value
+    Shared Function Uv2Level(value As String) As String
+        Return UvMapping(Convert.ToInt32(value))
     End Function
 
-    Shared Function Wind2Level(ByVal value As String) As String
-        Try
-            Return WindMapping(Convert.ToInt32(value))
-        Catch
-        End Try
-
-        Return value
+    Shared Function Wind2Level(value As String) As String
+        Return WindMapping(Convert.ToInt32(value))
     End Function
 
     Public Shared ReadOnly Processors As New Dictionary(Of String, Func(Of String, String)) From {
-        {"shex2dec", AddressOf Shex2dec},
+        {"shex2dec", AddressOf SignedHex2dec},
         {"hex2dec", AddressOf Hex2dec},
         {"str2dec", AddressOf Str2dec},
         {"dir2deg", AddressOf Dir2deg},
