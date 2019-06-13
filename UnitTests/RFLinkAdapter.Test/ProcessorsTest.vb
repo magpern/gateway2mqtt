@@ -73,7 +73,7 @@ Public Class ProcessorsTest
         Processors.Div10("10").Should.be("1")
         Processors.Div10("120").Should.be("12")
         Processors.Div10("124").Should.Be($"12{sep}4")
-        Processors.Div10("TEST").Should.be("TEST<")
+        Processors.Div10("TEST").Should.be("TEST")
     End Sub
 
     <TestCase>

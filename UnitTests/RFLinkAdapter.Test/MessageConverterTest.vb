@@ -84,6 +84,33 @@ Public Class MessageConverterTest
         result(0)("payload").Should.Contain("1.7").And.Contain("61")
     End Sub
 
+    <Test>
+    <TestCase("20;00;Nodo RadioFrequencyLink - RFLink Gateway V1.1 - R46;")>
+    <TestCase("Junk data input")>
+    Public sub Presentation_message_from_RFLink_to_mqtt2gateway(message As string)
+        'Arrange
+        'Setup of Shared/Static objects in MessageConverter is made in <SetUp>
+        'Act
+        dim result = MessageConverter.MessageToObject(message)
+
+        'Assess
+        Assert.IsNull(result)
+    End sub 
+    
+    <TestCase>
+    Public Sub Ping_message_from_RFLink_to_mqtt2gateway()
+        'Arrange
+        'Setup of Shared/Static objects in MessageConverter is made in <SetUp>
+        Const message = "20;99;PONG;"
+        'Act
+        dim result = MessageConverter.MessageToObject(message)
+
+        'Assess
+        result.Count.Should.Be(1)
+        result(0)("action").should.Be("SCC")
+    End Sub
+    
+    
     <TestCase>
     Public Sub Temp_and_Humidity_message_from_RFLink_to_mqtt2gateway_no_json()
         'Arrange

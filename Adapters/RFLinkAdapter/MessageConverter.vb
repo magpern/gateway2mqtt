@@ -23,7 +23,10 @@ Public Class MessageConverter
 
         Dim data As List(Of String) = msg.TrimEnd(";"c).Split(";").ToList
 
-        If data.Count > 0 AndAlso data(1) = "00" Then
+        If data.Count < 3 Then
+            'This is junk data
+            Logger.LogWarning(msg)
+        ElseIf data.Count = 3 AndAlso data(1) = "00" Then
             'This is the presentation message from the Gateway. Nice to look at, not useful for me
             Logger.LogDebug(data(2))
         Else

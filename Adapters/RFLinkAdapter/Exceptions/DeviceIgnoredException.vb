@@ -1,8 +1,10 @@
-﻿Imports System.Runtime.Serialization
+﻿Imports System.Diagnostics.CodeAnalysis
+Imports System.Runtime.Serialization
 
 Namespace Exceptions
 
-    <Serializable>
+    <ExcludeFromCodeCoverage> _
+    <Serializable> 
     Public Class DeviceIgnoredException
         Inherits Exception
 
