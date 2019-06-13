@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/magperndev/Gateway2mqtt/_apis/build/status/Gateway2mqtt?branchName=Development)]
+[![Build Status](https://dev.azure.com/magperndev/Gateway2mqtt/_apis/build/status/Gateway2mqtt?branchName=Development)](https://dev.azure.com/magperndev/Gateway2mqtt/_build/latest?definitionId=1&branchName=Development)
 # gateway2mqtt
 This application will act as the bridge between a device gateway and a MQTT broker.
 
