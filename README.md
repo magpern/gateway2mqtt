@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/magnuspernemark/magnuspernemark/_apis/build/status/magnuspernemark-.NET%20Desktop-CI?branchName=Development)](https://dev.azure.com/magnuspernemark/magnuspernemark/_build/latest?definitionId=1&branchName=Development)
+
 # gateway2mqtt
 This application will act as the bridge between a device gateway and a MQTT broker.
 
