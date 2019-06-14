@@ -25,10 +25,10 @@ Namespace AsyncExtensions
             Await serialPort.BaseStream.FlushAsync()
         End Function
 
-        <Extension()>
-        Async Function SendCommandAsync(ByVal serialPort As SerialPort, ByVal command As String) As Task(Of String)
-            Await serialPort.WriteLineAsync(command)
-            Return "hello world" ' Await serialPort.ReadLineAsync()
-        End Function
+        '<Extension()>
+        'Async Function SendCommandAsync(ByVal serialPort As SerialPort, ByVal command As String) As Task(Of String)
+        '    Await serialPort.WriteLineAsync(command)
+        '    Return "hello world" ' Await serialPort.ReadLineAsync()
+        'End Function
     End Module
 End Namespace
