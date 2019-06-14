@@ -1,5 +1,4 @@
 ﻿Imports System.IO.Ports
-Imports com.magpern.gateway2mqtt.Extentions.io.ports
 
 Public Class SerialConnection
 
