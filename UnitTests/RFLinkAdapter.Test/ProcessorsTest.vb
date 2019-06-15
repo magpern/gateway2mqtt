@@ -1,6 +1,6 @@
 Imports System.Globalization
-Imports FluentAssertions
 Imports com.magpern.gateway2mqtt
+Imports FluentAssertions
 Imports NUnit.Framework
 
 <TestFixture>
@@ -16,7 +16,7 @@ Public Class ProcessorsTest
         Processors.UvMapping(9).Should.be("V.HI")
         Processors.UvMapping(2000).Should.be("EX.HI")
         Processors.UvMapping(10000).Should.be("Undef")
-        Processors.UvMapping(-1).Should.be("Undef")
+        Processors.UvMapping(- 1).Should.be("Undef")
     End Sub
 
     <TestCase>
@@ -30,7 +30,7 @@ Public Class ProcessorsTest
         Processors.WindMapping(120).Should.be("STORM")
         Processors.WindMapping(999).Should.be("STORM")
         Processors.WindMapping(1000).Should.be("Undef")
-        Processors.WindMapping(-1).Should.be("Undef")
+        Processors.WindMapping(- 1).Should.be("Undef")
     End Sub
 
     <TestCase>
@@ -38,7 +38,7 @@ Public Class ProcessorsTest
         'Arrange
         'Act
         'assert
-        Processors.Hex2dec("-10").Should.be("-10") 
+        Processors.Hex2dec("-10").Should.be("-10")
         Processors.Hex2dec("10").Should.be("16")
         Processors.Hex2dec("A0").Should.be("160")
         Processors.Hex2dec("TEST").Should.be("TEST")
@@ -140,9 +140,6 @@ Public Class ProcessorsTest
         div10Res.Should.Be("3")
         wind2LevelRes.Should.Be("STORM")
     End Sub
-
-
 End Class
-
 
 

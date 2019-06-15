@@ -1,4 +1,6 @@
 ﻿
+Imports com.magpern.gateway2mqtt.Extentions.Interfaces
+
 Public Class GatewayVersion
     Implements IgatewayVersion
 

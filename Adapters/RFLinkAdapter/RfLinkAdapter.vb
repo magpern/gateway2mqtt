@@ -2,30 +2,31 @@ Imports System.IO.Ports
 Imports System.Threading
 Imports System.Timers
 Imports com.magpern.gateway2mqtt.Extentions
-Imports com.magpern.gateway2mqtt.Extentions.AsyncExtensions.SerialPortExtensions
-Imports Microsoft.Extensions.DependencyInjection
+Imports com.magpern.gateway2mqtt.Extentions.AsyncExtensions
+Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 Imports Microsoft.Extensions.Logging
 
 Public Class RfLinkAdapter
     Inherits SerialConnection
     Implements IGatewayAdapter
 
-    Private ReadOnly Property Logger() As ILogger
-    Private ReadOnly Config As IRFLinkConfig
-    Public Property ServiceProvider As ServiceProvider Implements IGatewayAdapter.ServiceProvider
+    Private ReadOnly Property Logger As ILogger
+    Private ReadOnly _config As IRFLinkConfig
     Private Shared _readThread As Thread
-    Private Shared _gatewayversion As IgatewayVersion
 
-    Public Sub New(ByVal logger As ILogger(Of RfLinkAdapter), config As IRFLinkConfig)
+    Public Sub New(logger As ILogger(Of RfLinkAdapter), config As IRFLinkConfig)
         Me.Logger = logger
-        Me.config = config
+        _config = config
     End Sub
 
-    Public Event DataRecieved(sender As IGatewayAdapter, e As GatewayDataRecievedArg) Implements IGatewayAdapter.DataRecieved
-    Public Event ConnectionState(sender As IGatewayAdapter, e As GatewayConnectionStateArg) Implements IGatewayAdapter.ConnectionState
+    Public Event DataReceived(sender As IGatewayAdapter, e As GatewayDataRecievedArg) _
+        Implements IGatewayAdapter.DataReceived
+
+    Public Event ConnectionState(sender As IGatewayAdapter, e As GatewayConnectionStateArg) _
+        Implements IGatewayAdapter.ConnectionState
 
     Public Sub StopAdapter() Implements IGatewayAdapter.StopAdapter
-        _continue = False
+        [Continue] = False
         Thread.Sleep(1)
         _readThread.Join()
         comPort.Close()
@@ -33,18 +34,18 @@ Public Class RfLinkAdapter
 
     Private Async Sub ReadAsync()
 
-        Dim aTimer = New System.Timers.Timer(60000)
+        Dim aTimer = New Timers.Timer(60000)
         ' Hook up the Elapsed event for the timer. 
         AddHandler aTimer.Elapsed, AddressOf OnTimedEventAsync
         aTimer.AutoReset = True
         aTimer.Enabled = True
 
         Try
-            While _continue
+            While [Continue]
                 Try
                     Dim message As String = Await comPort.ReadLineAsync
                     Await ProcessMessageAsync(message)
-                Catch __unusedTimeoutException1__ As TimeoutException
+                Catch unusedTimeoutException As TimeoutException
                 Catch e As OperationCanceledException
                     Logger.LogError(e, "Error while accessing COM port")
                     RaiseEvent ConnectionState(Me, New GatewayConnectionStateArg(Extentions.ConnectionState.Offline))
@@ -54,27 +55,38 @@ Public Class RfLinkAdapter
         Finally
             aTimer.Dispose()
         End Try
-
     End Sub
 
     Private Async Function ProcessMessageAsync(message As String) As Task
         Await Task.Factory.StartNew(Sub() ProcessMessage(message))
     End Function
 
-    Private Sub ProcessMessage(message As String)
-        Dim mess = ServiceProvider.GetService(Of MessageConverter)
-        mess.MessageToObject(message)
+    Private Async Sub ProcessMessage(message As String)
 
-        RaiseEvent DataRecieved(Me, New GatewayDataRecievedArg With
-                                       {.Payload = New DataPayload With
-                                       {.message = message}})
+        Dim result = MessageConverter.DecodeRawMessage(message)
+        Logger.LogDebug($"Recieved {result.Count} messages to process for queue")
+        For Each cmd As Dictionary(Of  String,string) In result
+            Dim mqttMessage As ImqttMessage = Await MessageToMQTTmessage(cmd)
+            
+            RaiseEvent _
+                DataReceived(Me,
+                             New GatewayDataRecievedArg With {.Payload = New DataPayload With {.message = mqttMessage}})
+        Next
     End Sub
 
+    Private Function MessageToMqttMessage(msg As Dictionary(Of String,String)) As ValueTask(Of IMqttMessage)
+        Logger.LogInformation(string.Join(";", msg.Select(Function(x) x.Key + "=" + x.Value).ToArray()))
+        Dim message As New MQTTMessage
+        message.Message = $"{msg("family")}/{msg("device_id")}/R/{msg("param")}"
+        
+            
+        
+    End Function
 
 
     Private Async Function StartAdapter() As Task Implements IGatewayAdapter.StartAdapter
         OpenComPort()
-        _continue = True
+        [Continue] = True
 
         Await comPort.BaseStream.FlushAsync
         comPort.RtsEnable = False
@@ -87,14 +99,15 @@ Public Class RfLinkAdapter
     End Function
 
     Private Sub OpenComPort()
-        comPort = New SerialPort(Config.RflinkTtyDevice, BaudRate, MapParity(Parity), DataBit, MapStopBits(StopBit)) With {
-            .ReadTimeout = ReadTimeout,
-            .WriteTimeout = WriteTimeout
-            }
+        comPort = New SerialPort(_config.RflinkTtyDevice, BaudRate, MapParity(Parity), DataBit, MapStopBits(StopBit)) _
+            With {
+                .ReadTimeout = ReadTimeout,
+                .WriteTimeout = WriteTimeout
+                }
 
         Do
             Try
-                Logger.LogDebug($"Atempting to open COM-port {Config.RflinkTtyDevice}")
+                Logger.LogDebug($"Atempting to open COM-port {_config.RflinkTtyDevice}")
                 comPort.Open()
                 Exit Do
             Catch ex As Exception
@@ -102,7 +115,6 @@ Public Class RfLinkAdapter
                 Thread.Sleep(5000)
             End Try
         Loop While Not comPort.IsOpen
-
     End Sub
 
     Private Async Sub OnTimedEventAsync(sender As Object, e As ElapsedEventArgs)
@@ -116,17 +128,16 @@ Public Class RfLinkAdapter
         Throw New NotImplementedException()
     End Function
 
-    Public Async Function RequestGatewayVerionAsync() As Task(Of IgatewayVersion) Implements IGatewayAdapter.RequestGatewayVerionAsync
-        If _gatewayversion Is Nothing Then
-            If comPort.IsOpen Then
-                Await comPort.WriteLineAsync("10;VERSION;")
-                _gatewayversion = New GatewayVersion With {.Name = "fake version"}
-            End If
-            Do
-                Thread.Sleep(50)
-            Loop While _gatewayversion Is Nothing
-        End If
-        Return _gatewayversion
-    End Function
-
+'    Public Async Function RequestGatewayVerionAsync() As Task(Of IgatewayVersion) Implements IGatewayAdapter.RequestGatewayVerionAsync
+'        If _gatewayversion Is Nothing Then
+'            If comPort.IsOpen Then
+'                Await comPort.WriteLineAsync("10;VERSION;")
+'                _gatewayversion = New GatewayVersion With {.Name = "fake version"}
+'            End If
+'            Do
+'                Thread.Sleep(50)
+'            Loop While _gatewayversion Is Nothing
+'        End If
+'        Return _gatewayversion
+'    End Function
 End Class

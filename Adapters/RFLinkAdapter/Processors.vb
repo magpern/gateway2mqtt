@@ -19,7 +19,7 @@ Public MustInherit Class Processors
         {13, "WNW"},
         {14, "NW"},
         {15, "NNW"}
-    }
+        }
 
     Public Shared Function UvMapping(value As Integer) As String
         Try
@@ -50,14 +50,14 @@ Public MustInherit Class Processors
         {Enumerable.Range(14, 42 - 14), "MODERATE"},
         {Enumerable.Range(42, 88 - 42), "STRONG"},
         {Enumerable.Range(88, 1000 - 88), "STORM"}
-    }
+        }
 
     Shared Function SignedHex2dec(value As String) As String
         Try
             Dim val As Integer = Convert.ToInt32(value, 16)
 
             If val >= 32768 Then
-                val = -1 * (val - 32768)
+                val = - 1*(val - 32768)
             End If
 
             Return val.ToString("G", CultureInfo.InvariantCulture)
@@ -85,7 +85,7 @@ Public MustInherit Class Processors
 
     Shared Function Div10(value As String) As String
         Try
-            Return (Convert.ToDouble(value) / 10).ToString("G", CultureInfo.InvariantCulture)
+            Return (Convert.ToDouble(value)/10).ToString("G", CultureInfo.InvariantCulture)
         Catch
             Return value
         End Try
@@ -97,7 +97,7 @@ Public MustInherit Class Processors
             'Wind direction (integer value from 0-15) reflecting 0-360 degrees in 22.5 degree steps
             'meaning, 0 is 0 and 15 is 337.5 if steps are 22.5 degrees
             If Enumerable.Range(0, 16).Contains(Convert.ToInt32(value)) Then
-                Return (Convert.ToInt32(value) * 22.5).ToString("G", CultureInfo.InvariantCulture)
+                Return (Convert.ToInt32(value)*22.5).ToString("G", CultureInfo.InvariantCulture)
             Else
                 Throw New IndexOutOfRangeException
             End If
@@ -105,7 +105,6 @@ Public MustInherit Class Processors
         Catch
             Return "Undef"
         End Try
-
     End Function
 
     Shared Function Dir2Car(value As String) As String
@@ -114,7 +113,6 @@ Public MustInherit Class Processors
         Catch
             Return "Undef"
         End Try
-
     End Function
 
     Shared Function Uv2Level(value As String) As String
@@ -134,6 +132,5 @@ Public MustInherit Class Processors
         {"div10", AddressOf Div10},
         {"uv2level", AddressOf Uv2Level},
         {"wind2level", AddressOf Wind2Level}
-    }
-
+        }
 End Class

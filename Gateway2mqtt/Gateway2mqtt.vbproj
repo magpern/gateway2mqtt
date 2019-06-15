@@ -5,6 +5,7 @@
     <RootNamespace>com.magpern.gateway2mqtt</RootNamespace>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <StartupObject>Sub Main</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0-preview5.19227.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0-preview5.19227.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />
+    <PackageReference Include="MQTTnet" Version="3.0.3-rc3" />
     <PackageReference Include="System.Text.Json" Version="4.6.0-preview6.19259.10" />
   </ItemGroup>
 

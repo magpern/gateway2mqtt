@@ -1,16 +1,19 @@
 ﻿Imports com.magpern.gateway2mqtt.Extentions
-Imports Microsoft.Extensions.Logging
+Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 
-Public MustInherit Class RFLinkConfig
+Public Class RFLinkConfig
     Inherits Config
     Implements IRFLinkConfig
 
     Public ReadOnly Property RflinkIgnoredDevices As List(Of String) Implements IRFLinkConfig.RflinkIgnoredDevices
-    Public ReadOnly Property RflinkOutputParamsProcessing As Dictionary(Of String, List(Of String)) Implements IRFLinkConfig.RflinkOutputParamsProcessing
+
+    Public ReadOnly Property RflinkOutputParamsProcessing As Dictionary(Of String, List(Of String)) _
+        Implements IRFLinkConfig.RflinkOutputParamsProcessing
+
     Public ReadOnly Property RflinkTtyDevice As String Implements IRFLinkConfig.RflinkTtyDevice
 
     Public Sub New()
-        RflinkTtyDevice = ConfigData.Element("rflink_tty_device").value 
+        RflinkTtyDevice = ConfigData.Element("rflink_tty_device").value
 
         Dim ignoreDeviceList = ConfigData.Elements("rflink_ignored_devices")
         RflinkIgnoredDevices = New List(Of String)
@@ -36,5 +39,4 @@ Public MustInherit Class RFLinkConfig
             Next
         End If
     End Sub
-
 End Class

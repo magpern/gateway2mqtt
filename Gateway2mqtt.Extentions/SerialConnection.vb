@@ -1,20 +1,19 @@
 ﻿Imports System.IO.Ports
 
 Public Class SerialConnection
+    Protected ComPort As SerialPort
 
-    Protected comPort As SerialPort
+    Protected [Continue] As Boolean
 
-    Protected _continue As Boolean
+    Protected Property Port As String = "COM6"
+    Protected Property BaudRate As Integer = 57600
+    Protected Property DataBit As Integer = 8
+    Protected Property Parity As SerialParity = SerialParity.None
+    Protected Property StopBit As SerialStopBits = SerialStopBits.One
+    Protected Property ReadTimeout As Integer = 500
+    Protected Property WriteTimeout As Integer = 500
 
-    Property Port As String = "COM6"
-    Property BaudRate As Integer = 57600
-    Property DataBit As Integer = 8
-    Property Parity As SerialParity = SerialParity.None
-    Property StopBit As SerialStopBits = SerialStopBits.One
-    Property ReadTimeout As Integer = 500
-    Property WriteTimeout As Integer = 500
-
-    Public Enum SerialParity
+    Protected Enum SerialParity
         '
         ' Summary:
         '     No parity check occurs.
@@ -37,7 +36,7 @@ Public Class SerialConnection
         Space = 4
     End Enum
 
-    Public Enum SerialStopBits
+    Protected Enum SerialStopBits
         ' <summary>No stop bits are used. This value Is Not supported by the <see cref="P:System.IO.Ports.SerialPort.StopBits"></see> property.</summary>
         ' <returns></returns>
         None
@@ -52,8 +51,8 @@ Public Class SerialConnection
         OnePointFive
     End Enum
 
-    Protected Function MapStopBits(stopBit As SerialStopBits) As StopBits
-        Select Case stopBit
+    Protected Shared Function MapStopBits(bit As SerialStopBits) As StopBits
+        Select Case bit
             Case SerialStopBits.None
                 Return StopBits.None
             Case SerialStopBits.One
@@ -67,8 +66,8 @@ Public Class SerialConnection
         End Select
     End Function
 
-    Protected Function MapParity(parity As SerialParity) As Parity
-        Select Case parity
+    Protected Shared Function MapParity(parityValue As SerialParity) As Parity
+        Select Case parityvalue
             Case SerialParity.Even
                 Return System.IO.Ports.Parity.Even
             Case SerialParity.Mark
@@ -83,7 +82,5 @@ Public Class SerialConnection
                 Return System.IO.Ports.Parity.None
         End Select
     End Function
-
-
 End Class
 
