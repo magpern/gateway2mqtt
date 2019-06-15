@@ -1,5 +1,6 @@
 Namespace Interfaces
     Public Interface IMqttMessage
-        Property Message As String
+        Property Topic As String
+        Property Payload as String
     End Interface
 End NameSpace

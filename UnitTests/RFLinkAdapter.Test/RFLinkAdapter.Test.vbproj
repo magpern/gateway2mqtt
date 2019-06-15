@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>RFLinkAdapter.Test</RootNamespace>
+    <RootNamespace>com.magpern.gateway2mqtt.test</RootNamespace>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <OutputType>Library</OutputType>
     <StartupObject />

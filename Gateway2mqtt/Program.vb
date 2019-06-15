@@ -7,7 +7,6 @@ Imports Microsoft.Extensions.Logging
 Imports MQTTnet
 Imports MQTTnet.Client
 Imports MQTTnet.Client.Options
-Imports MQTTnet.Server
 
 Public Class Program
     Private Const Loglevel As LogLevel = LogLevel.Trace
@@ -69,7 +68,7 @@ Public Class Program
     Private Shared Sub ConfigureServices(ByVal services As IServiceCollection)
         services.AddLogging(Function(configure) configure.AddConsole()) _
             .Configure(New Action(Of LoggerFilterOptions)(Sub(x) x.MinLevel = Loglevel)) _
-            .AddSingleton(Of RfLinkAdapter).AddSingleton(Of HomeAssistantBinder).AddTransient(Of MessageConverter) _
+            .AddSingleton(Of IGatewayAdapter,RfLinkAdapter).AddSingleton(Of HomeAssistantBinder).AddTransient(Of MessageConverter) _
             .AddSingleton(Of IConfig, Config).AddSingleton(Of IRFLinkConfig, RFLinkConfig)
     End Sub
 

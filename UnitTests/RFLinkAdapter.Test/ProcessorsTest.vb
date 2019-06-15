@@ -1,5 +1,4 @@
 Imports System.Globalization
-Imports com.magpern.gateway2mqtt
 Imports FluentAssertions
 Imports NUnit.Framework
 
