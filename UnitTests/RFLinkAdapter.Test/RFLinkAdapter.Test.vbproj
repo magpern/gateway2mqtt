@@ -20,4 +20,13 @@
     <ProjectReference Include="..\..\Adapters\RFLinkAdapter\RFLinkAdapter.vbproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="config2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
 ﻿Imports com.magpern.gateway2mqtt.Exceptions
+Imports com.magpern.gateway2mqtt.Extentions.Exceptions
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 Imports Microsoft.Extensions.Logging
 

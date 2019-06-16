@@ -15,17 +15,34 @@ Public Class Config
 
     Protected ConfigData As XElement
 
-    Public Sub New()
-        ConfigData = XElement.Load("config.xml")
+    Public Sub New(configFileName As String)
+        If String.IsNullOrEmpty(configFileName) Then configFileName = "config.xml"
+        Try
+            ConfigData = XElement.Load(configFileName)
+        Catch
+            ConfigData = nothing
+        End Try
 
-        MqttHost = ConfigData.Element("mqtt_host").Value
-        MqttPort = CType(ConfigData.Element("mqtt_port").Value, Integer)
-        MqttUser = ConfigData.Element("mqtt_user").Value
-        MqttPassword = ConfigData.Element("mqtt_password").Value
-        MqttPrefix = ConfigData.Element("mqtt_prefix").Value
-        MqttMessageTimeout = CType(ConfigData.Element("mqtt_message_timeout").Value, Integer)
-        MqttSwitchInclTopic = CType(ConfigData.Element("mqtt_switch_incl_topic").Value, Boolean)
-        MqttJson = CType(ConfigData.Element("mqtt_json").Value, Boolean)
-        MqttIncludeMessage = CType(ConfigData.Element("mqtt_include_message").Value, Boolean)
+        If ConfigData IsNot Nothing Then
+            MqttHost = If(ConfigData.Element("mqtt_host") IsNot Nothing, ConfigData.Element("mqtt_host").Value, "mqtt.home")
+            MqttPort = If(ConfigData.Element("mqtt_port") IsNot Nothing, CType(ConfigData.Element("mqtt_port").Value, Integer), 1883)
+            MqttUser = If(ConfigData.Element("mqtt_user") IsNot Nothing, ConfigData.Element("mqtt_user").Value, String.Empty)
+            MqttPassword = If(ConfigData.Element("mqtt_password") IsNot Nothing, ConfigData.Element("mqtt_password").Value, String.Empty)
+            MqttPrefix = If(ConfigData.Element("mqtt_prefix") IsNot Nothing, ConfigData.Element("mqtt_prefix").Value, "myprefix")
+            MqttMessageTimeout = If(ConfigData.Element("mqtt_message_timeout") IsNot Nothing, CType(ConfigData.Element("mqtt_message_timeout").Value, Integer), 60)
+            MqttSwitchInclTopic = (ConfigData.Element("mqtt_switch_incl_topic") Is Nothing) OrElse CType(ConfigData.Element("mqtt_switch_incl_topic").Value, Boolean)
+            MqttJson = (ConfigData.Element("mqtt_json") Is Nothing) OrElse CType(ConfigData.Element("mqtt_json").Value, Boolean)
+            MqttIncludeMessage = (ConfigData.Element("mqtt_include_message") IsNot Nothing) AndAlso CType(ConfigData.Element("mqtt_include_message").Value, Boolean)
+        Else
+            MqttHost = "mqtt.home"
+            MqttPort = 1883
+            MqttUser = String.Empty
+            MqttPassword = String.Empty
+            MqttPrefix = "myprefix"
+            MqttMessageTimeout = 60
+            MqttSwitchInclTopic = True
+            MqttJson = True
+            MqttIncludeMessage = False
+        End If
     End Sub
 End Class

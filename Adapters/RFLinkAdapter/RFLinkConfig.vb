@@ -1,4 +1,5 @@
 ﻿Imports com.magpern.gateway2mqtt.Extentions
+Imports com.magpern.gateway2mqtt.Extentions.Exceptions
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 
 Public Class RfLinkConfig
@@ -12,10 +13,25 @@ Public Class RfLinkConfig
 
     Public ReadOnly Property RflinkTtyDevice As String Implements IRFLinkConfig.RflinkTtyDevice
 
-    Public Sub New()
-        RflinkTtyDevice = ConfigData.Element("rflink_tty_device").value
+    Public Sub New
+        MyClass.New(string.Empty)
+    End Sub
 
-        Dim ignoreDeviceList = ConfigData.Elements("rflink_ignored_devices")
+    Public Sub New(configfile As string)
+        MyBase.New(configfile)
+        Try
+            RflinkTtyDevice = ConfigData.Element("rflink_tty_device").Value
+        Catch e As Exception
+            Throw New MissingConfigValueException("rflink_tty_device", e)
+        End Try
+
+        Dim ignoreDeviceList As IEnumerable(Of XElement)
+        Try
+            ignoreDeviceList = ConfigData.Elements("rflink_ignored_devices")
+        Catch
+            ignoreDeviceList = New List(Of XElement)
+        End Try
+
         RflinkIgnoredDevices = New List(Of String)
         If ignoreDeviceList.Count > 0 Then
             For Each e As XElement In ignoreDeviceList
@@ -23,7 +39,13 @@ Public Class RfLinkConfig
             Next
         End If
 
-        Dim rflinkParamsProcessing = ConfigData.Elements("rflink_output_params_processing")
+        Dim rflinkParamsProcessing As IEnumerable(Of XElement)
+        Try
+            rflinkParamsProcessing = ConfigData.Elements("rflink_output_params_processing")
+        Catch
+            rflinkParamsProcessing = New List(Of XElement)
+        End Try
+
         RflinkOutputParamsProcessing = New Dictionary(Of String, List(Of String))
 
         If rflinkParamsProcessing.Count > 0 Then
