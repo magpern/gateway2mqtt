@@ -23,10 +23,10 @@ Public Class RfLinkAdapter
     Public Property DataBit As Integer = 8 Implements ISerialConnection.DataBit
     Public Property Parity As SerialParity = SerialParity.None Implements ISerialConnection.Parity
     Public Property StopBit As SerialStopBits = SerialStopBits.One Implements ISerialConnection.StopBit
-    Public Property ReadTimeout As Integer = 500 Implements ISerialConnection.ReadTimeout
-    Public Property WriteTimeout As Integer = 500 Implements ISerialConnection.WriteTimeout
+    Public Property ReadTimeout As Integer = SerialPort.InfiniteTimeout Implements ISerialConnection.ReadTimeout
+    Public Property WriteTimeout As Integer = SerialPort.InfiniteTimeout Implements ISerialConnection.WriteTimeout
 
-    Public Sub New(log As ILogger(Of IGatewayAdapter), conf As IRfLinkConfig)
+    Public Sub New(log As ILogger(Of RfLinkAdapter), conf As IRfLinkConfig)
         Logger = log
         Config = conf
     End Sub
@@ -48,12 +48,15 @@ Public Class RfLinkAdapter
     <ExcludeFromCodeCoverage> _
     Private Async Sub ReadAsync()
 
-        Dim aTimer = New Timers.Timer(60000)
-        ' Hook up the Elapsed event for the timer. 
-        AddHandler aTimer.Elapsed, AddressOf OnTimedEventAsync
-        aTimer.AutoReset = True
-        aTimer.Enabled = True
-
+        Dim aTimer As New Timers.Timer(60000)
+        If Config.Rflinkheartbeat Then
+            aTimer.Interval = Config.RflinkHeartbeatInterval
+            ' Hook up the Elapsed event for the timer. 
+            AddHandler aTimer.Elapsed, AddressOf OnTimedEventAsync
+            aTimer.AutoReset = True
+            aTimer.Enabled = True
+        End If
+        
         Try
             While DoContinue
                 Try
@@ -61,13 +64,14 @@ Public Class RfLinkAdapter
                     Await ProcessMessageAsync(message)
                 Catch unusedTimeoutException As TimeoutException
                 Catch e As OperationCanceledException
-                    Logger.LogError(e, "Error while accessing COM port")
+                    Logger.LogError(e, "Error while accessing serial port")
                     RaiseEvent ConnectionState(Me, New GatewayConnectionStateArg(Extentions.ConnectionState.Offline))
                     Exit While
                 End Try
             End While
         Finally
             aTimer.Dispose()
+            ComPort.Dispose 
         End Try
     End Sub
 
@@ -75,15 +79,20 @@ Public Class RfLinkAdapter
         Await Task.Factory.StartNew(Sub() ProcessMessage(message))
     End Function
 
-    Public Async Sub ProcessMessage(message As String)
+    Public Async Sub ProcessMessage(msg As String)
+        Dim message = msg.Substring(0, msg.LastIndexOf(";", StringComparison.Ordinal) + 1)
         Dim result = MessageConverter.DecodeRawMessage(message)
-        Logger.LogDebug($"Recieved {result.Count} messages to process for queue")
-        For Each cmd As Dictionary(Of String, String) In result
-            Dim mqttMessage As IMqttMessage = Await MessageToMqttMessage(cmd)
+        If result IsNot Nothing Then
+            Logger.LogDebug($"Recieved {result.Count} messages to process for queue")
+            For Each cmd As Dictionary(Of String, String) In result
+                Dim mqttMessage As IMqttMessage = Await MessageToMqttMessage(cmd)
 
-            RaiseEvent DataReceived(Me,
-                             New GatewayDataRecievedArg With {.Payload = New DataPayload With {.Message = mqttMessage}})
-        Next
+                RaiseEvent DataReceived(Me,
+                                 New GatewayDataRecievedArg With {.Payload = mqttMessage})
+            Next
+        Else
+            Logger.LogDebug($"Message not releyed to MQTT ({message})")
+        End If
     End Sub
 
     Public Shared Function MessageToMqttMessage(msg As Dictionary(Of String, String)) As ValueTask(Of IMqttMessage)
@@ -105,16 +114,20 @@ Public Class RfLinkAdapter
     End Function
 
     <ExcludeFromCodeCoverage> _
-    Private Async Function StartAdapter() As Task Implements IGatewayAdapter.StartAdapter
+    Public Async Function StartAdapter() As Task Implements IGatewayAdapter.StartAdapter
         OpenComPort()
         DoContinue = True
-
         Await ComPort.BaseStream.FlushAsync
-        ComPort.RtsEnable = False
+        ComPort.RtsEnable = true
         ComPort.DtrEnable = True
-        ReadThread = New Thread(AddressOf ReadAsync)
-        ReadThread.IsBackground = True
-        ReadThread.Name = Me.GetType.ToString
+        ComPort.DiscardInBuffer 
+        ComPort.DiscardOutBuffer
+        'ComPort.WriteLineAsync("10;RESET;").Wait 
+
+        ReadThread = New Thread(AddressOf ReadAsync) With {
+            .IsBackground = True,
+            .Name = Me.GetType.ToString
+                        }
         ReadThread.Start()
         RaiseEvent ConnectionState(Me, New GatewayConnectionStateArg(Extentions.ConnectionState.Online))
     End Function
@@ -129,8 +142,9 @@ Public Class RfLinkAdapter
 
         Do
             Try
-                Logger.LogDebug($"Atempting to open COM-port {Config.RflinkTtyDevice}")
+                Logger.LogDebug($"Atempting to open serial port {Config.RflinkTtyDevice}")
                 ComPort.Open()
+                Logger.LogInformation("Serial port open")
                 Exit Do
             Catch ex As Exception
                 Logger.LogWarning(ex.Message)

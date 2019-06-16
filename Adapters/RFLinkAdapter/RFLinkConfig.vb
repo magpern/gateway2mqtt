@@ -12,6 +12,8 @@ Public Class RfLinkConfig
         Implements IRFLinkConfig.RflinkOutputParamsProcessing
 
     Public ReadOnly Property RflinkTtyDevice As String Implements IRFLinkConfig.RflinkTtyDevice
+    Public ReadOnly Property Rflinkheartbeat As Boolean Implements IRfLinkConfig.Rflinkheartbeat
+    Public ReadOnly Property RflinkHeartbeatInterval As Integer Implements IRfLinkConfig.RflinkHeartbeatInterval
 
     Public Sub New
         MyClass.New(string.Empty)
@@ -60,5 +62,13 @@ Public Class RfLinkConfig
                 End If
             Next
         End If
+
+        Rflinkheartbeat = (ConfigData.Element("rflink_heartbeat") Is Nothing) OrElse CType(ConfigData.Element("rflink_heartbeat").Value, Boolean)
+        Try
+            RflinkHeartbeatInterval = If(ConfigData.Element("rflink_heartbeat_interval") IsNot Nothing, CType(ConfigData.Element("rflink_heartbeat_interval").Value, Integer) * 1000, 60000)
+        Catch e As Exception
+            Throw new MissingConfigValueException($"rflink_heartbeat_interval {RflinkHeartbeatInterval}", e)
+        End Try
+
     End Sub
 End Class

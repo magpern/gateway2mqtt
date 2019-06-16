@@ -10,6 +10,8 @@
   <mqtt_json>true</mqtt_json>
   <mqtt_include_message>false</mqtt_include_message>
   <rflink_tty_device>COM6</rflink_tty_device>
+  <rflink_heartbeat>true</rflink_heartbeat>
+  <rflink_heartbeat_interval>60</rflink_heartbeat_interval>
   <rflink_output_params_processing>
     <ID/>
     <SWITCH/>

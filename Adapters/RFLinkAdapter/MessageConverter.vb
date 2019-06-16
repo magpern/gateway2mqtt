@@ -3,14 +3,15 @@ Imports com.magpern.gateway2mqtt.Extentions.Exceptions
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 Imports Microsoft.Extensions.Logging
 
-Public Class MessageConverter
+Public MustInherit Class MessageConverter
+
     Public Shared Property Logger As ILogger
     Public Shared Config As IRFLinkConfig
 
-    Public Sub New(log As ILogger(Of MessageConverter), conf As IConfig)
-        Logger = log
-        Config = CType(conf, IRFLinkConfig)
-    End Sub
+    'Public Sub New(log As ILogger(Of MessageConverter), conf As IConfig)
+    '    Logger = log
+    '    Config = CType(conf, IRFLinkConfig)
+    'End Sub
 
     Public Shared Function DecodeRawMessage(msg As String) As List(Of Dictionary(Of String, String))
         '20;02;Name;ID=9999;LABEL=data;
@@ -26,9 +27,9 @@ Public Class MessageConverter
         If data.Count < 3 Then
             'This is junk data
             Logger.LogWarning(msg)
-        ElseIf data.Count = 3 AndAlso data(1) = "00" Then
+        ElseIf data.Count = 3 andalso data(0) = "20" AndAlso data(1) = "00" Then
             'This is the presentation message from the Gateway. Nice to look at, not useful for me
-            Logger.LogDebug(data(2))
+            Logger.LogInformation(data(2))
         Else
             Logger.LogDebug($"Recieved message: {String.Join("; ", data.ToArray)}")
 
@@ -97,7 +98,7 @@ Public Class MessageConverter
                             Dim keymod As String
                             If _
                                 key.Key = "CMD" AndAlso Config.MqttSwitchInclTopic AndAlso
-                                Convert.ToInt32(switchNum) >= 0 Then
+                                Convert.ToInt32(switchNum,16) >= 0 Then
                                 keymod = $"{switchNum}/CMD"
                             Else
                                 keymod = key.Key

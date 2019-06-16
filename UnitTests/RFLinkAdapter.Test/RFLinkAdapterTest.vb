@@ -22,13 +22,34 @@ Public Class RfLinkAdapterTest
         Dim mqttMessage As IMqttMessage = Nothing
         Dim hitCount as Integer 
         'Arrange
-        Dim rflink As New RfLinkAdapter(Mock.Of(Of ILogger(Of IGatewayAdapter)), TestHelper.CreateMockConfig.Object)
+        Dim rflink As New RfLinkAdapter(Mock.Of(Of ILogger(Of RfLinkAdapter)), TestHelper.CreateMockConfig.Object)
         AddHandler rflink.DataReceived, Sub(sender As IGatewayAdapter, e As GatewayDataRecievedArg)
-            mqttMessage = e.Payload.Message 
+            mqttMessage = e.Payload 
             hitCount += 1
         End Sub
         'Act
         rflink.ProcessMessage("20;06;Kaku;ID=41;SWITCH=1;CMD=ON;")
+
+        'Assert
+        Assert.NotNull(mqttMessage)
+        hitCount.Should.Be(1)
+        mqttMessage.Payload.Should.Be("{""CMD"": ON}")
+        mqttMessage.Topic.Should.Be($"{RfLinkAdapter.Config.MqttPrefix}/Kaku/41/R/1/message")
+    End Sub
+
+    <TestCase>
+    Public Sub ProcessMessage_Button_click_message_with_newline()
+        'Setup
+        Dim mqttMessage As IMqttMessage = Nothing
+        Dim hitCount as Integer 
+        'Arrange
+        Dim rflink As New RfLinkAdapter(Mock.Of(Of ILogger(Of RfLinkAdapter)), TestHelper.CreateMockConfig.Object)
+        AddHandler rflink.DataReceived, Sub(sender As IGatewayAdapter, e As GatewayDataRecievedArg)
+            mqttMessage = e.Payload 
+            hitCount += 1
+        End Sub
+        'Act
+        rflink.ProcessMessage($"20;06;Kaku;ID=41;SWITCH=1;CMD=ON;{Environment.NewLine}")
 
         'Assert
         Assert.NotNull(mqttMessage)
@@ -43,9 +64,9 @@ Public Class RfLinkAdapterTest
         Dim mqttMessage As IMqttMessage = Nothing
         Dim hitCount as Integer 
         'Arrange
-        Dim rflink As New RfLinkAdapter(Mock.Of(Of ILogger(Of IGatewayAdapter)), TestHelper.CreateMockConfig.Object)
+        Dim rflink As New RfLinkAdapter(Mock.Of(Of ILogger(Of RfLinkAdapter)), TestHelper.CreateMockConfig.Object)
         AddHandler rflink.DataReceived, Sub(sender As IGatewayAdapter, e As GatewayDataRecievedArg)
-            mqttMessage = e.Payload.Message 
+            mqttMessage = e.Payload 
             hitCount += 1
         End Sub
         'Act
@@ -61,7 +82,7 @@ Public Class RfLinkAdapterTest
     <TestCase>
     Public Async Function MessageToMqttMessage_Button_click_message() As Task
         'Arrange
-        Dim rflinkadapter As New RfLinkAdapter(Mock.Of(Of ILogger(Of IGatewayAdapter)), TestHelper.CreateMockConfig.Object)
+        Dim rflinkadapter As New RfLinkAdapter(Mock.Of(Of ILogger(Of RfLinkAdapter)), TestHelper.CreateMockConfig.Object)
         Dim message As List(Of Dictionary(Of String, String)) = MessageConverter.DecodeRawMessage("20;06;Kaku;ID=41;SWITCH=1;CMD=ON;")
 
         'Act
@@ -77,7 +98,7 @@ Public Class RfLinkAdapterTest
     <TestCase>
     Public Async Function MessageToMqttMessage_Button_click_message_no_family() As Task
         'Arrange
-        Dim rflinkadapter As New RfLinkAdapter(Mock.Of(Of ILogger(Of IGatewayAdapter)), TestHelper.CreateMockConfig.Object)
+        Dim rflinkadapter As New RfLinkAdapter(Mock.Of(Of ILogger(Of RfLinkAdapter)), TestHelper.CreateMockConfig.Object)
         Dim message As List(Of Dictionary(Of String, String)) = MessageConverter.DecodeRawMessage("20;06;;ID=41;SWITCH=1;CMD=ON;")
 
         'Act

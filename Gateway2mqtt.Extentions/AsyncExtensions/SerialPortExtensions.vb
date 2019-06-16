@@ -13,6 +13,7 @@ Namespace AsyncExtensions
             While True
                 Await serialPort.BaseStream.ReadAsync(buffer, 0, 1)
                 ret += encoder.GetString(buffer)
+                Debug.Print(ret)
                 If ret.EndsWith(serialPort.NewLine) Then Return ret.Substring(0, ret.Length - serialPort.NewLine.Length)
             End While
         End Function

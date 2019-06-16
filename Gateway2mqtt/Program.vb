@@ -11,23 +11,22 @@ Imports MQTTnet.Client
 Imports MQTTnet.Client.Options
 
 Public Class Program
-    Private Const Loglevel As LogLevel = LogLevel.Trace
+    Private Const Loglevel As LogLevel = LogLevel.Debug
 
     Private Shared _logger As ILogger
-    Private Shared ReadOnly _closing As New AutoResetEvent(False)
+    Private Shared ReadOnly IsClosingRequested As New AutoResetEvent(False)
     Private Shared _mqttConnection As IMqttClient
-    Private Shared ReadOnly cts As New CancellationTokenSource()
 
     <ExcludeFromCodeCoverage> _
-    Public Shared Sub Main(ByVal args As String())
+    Public Shared Sub Main(args As String())
         AddHandler AppDomain.CurrentDomain.ProcessExit, AddressOf CurrentDomain_ProcessExit
         AddHandler AssemblyLoadContext.Default.Unloading, AddressOf Default_Unloading
         AddHandler System.Console.CancelKeyPress, AddressOf OnExit
-        MainAsync(args, cts.Token).GetAwaiter.GetResult 
+        MainAsync(args).GetAwaiter.GetResult 
     End Sub
 
     <ExcludeFromCodeCoverage> _
-    Private Shared Async Function MainAsync(ByVal args As String(), ByVal token As CancellationToken) As Task
+    Private Shared Async Function MainAsync(args As String()) As Task
         
         Dim serviceCollection = New ServiceCollection()
         ConfigureServices(serviceCollection)
@@ -35,10 +34,18 @@ Public Class Program
         _logger = serviceProvider.GetService(Of ILogger(Of Program))()
         _logger.LogInformation("Gateway2mqtt is started")
 
+        MessageConverter.Logger = serviceProvider.GetService(Of ILogger(Of MessageConverter))
+        MessageConverter.Config = serviceProvider.GetService(Of IRFLinkConfig)
+
         'TODO Connect the MQTT
-        _mqttConnection = await MqttConnect
+        '_mqttConnection = await MqttConnect()
         '_mqttConnection.
         'TODO Start serial communication 
+        Dim rflink = serviceProvider.GetService(Of RfLinkAdapter)
+        AddHandler rflink.ConnectionState, AddressOf GatewayConnectionState
+        AddHandler rflink.DataReceived, AddressOf DataProcessor 
+        Await rflink.StartAdapter 
+
         'TODO Set Subscribe thread
 
         'Dim rflink As IGatewayAdapter = serviceProvider.GetService(Of RfLinkAdapter)
@@ -48,11 +55,11 @@ Public Class Program
         'AddHandler rflink.DataRecieved, AddressOf DataProcessor
         'AddHandler rflink.ConnectionState, AddressOf GatewayConnectionState
 
-        _closing.WaitOne()
+        IsClosingRequested.WaitOne()
 
         'RunningThreads.ForEach(Sub(x) x.StopAdapter())
 
-        System.Console.ReadKey()
+        'System.Console.ReadKey()
     End Function
 
     Private Shared Async Sub GatewayConnectionState(sender As IGatewayAdapter, e As GatewayConnectionStateArg)
@@ -65,40 +72,37 @@ Public Class Program
     End Sub
 
     Private Shared Sub DataProcessor(sender As Object, e As GatewayDataRecievedArg)
-        _logger.LogTrace(e.Payload.message.Payload)
+        _logger.LogTrace($"{sender.ToString} : {e.Payload.ToString}")
     End Sub
 
     <ExcludeFromCodeCoverage> _
-    Private Shared Sub ConfigureServices(ByVal services As IServiceCollection)
+    Private Shared Sub ConfigureServices(services As IServiceCollection)
         services.AddLogging(Function(configure) configure.AddConsole()) _
             .Configure(New Action(Of LoggerFilterOptions)(Sub(x) x.MinLevel = Loglevel)) _
-            .AddSingleton(Of IGatewayAdapter,RfLinkAdapter).AddSingleton(Of HomeAssistantBinder).AddTransient(Of MessageConverter) _
+            .AddSingleton(Of RfLinkAdapter).AddSingleton(Of HomeAssistantBinder) _
             .AddSingleton(Of IConfig, Config).AddSingleton(Of IRFLinkConfig, RFLinkConfig)
     End Sub
 
     <ExcludeFromCodeCoverage> _
     Private Shared Sub Default_Unloading(obj As AssemblyLoadContext)
         System.Console.WriteLine("unload")
-        _closing.Set()
-        cts.CancelAfter(300)
+        IsClosingRequested.Set()
     End Sub
 
     <ExcludeFromCodeCoverage> _
     Private Shared Sub CurrentDomain_ProcessExit(sender As Object, e As System.EventArgs)
         System.Console.WriteLine("process exit")
-        _closing.Set()
-        cts.CancelAfter(300)
+        IsClosingRequested.Set()
     End Sub
 
     <ExcludeFromCodeCoverage> _
     Private Shared Sub OnExit(sender As Object, args As ConsoleCancelEventArgs)
         _logger.LogInformation("OnExit is triggered. Initiating shutdown")
         args.Cancel = True
-        _closing.Set()
-        cts.CancelAfter(300)
+        IsClosingRequested.Set()
     End Sub
 
-    Public Shared Async Function MqttConnect() As Task(of Client.IMqttClient)
+    Public Shared Async Function MqttConnect() As Task(of IMqttClient)
         ' Create a new MQTT client.
         Dim factory = New MqttFactory()
         Dim mqttClient = factory.CreateMqttClient()
