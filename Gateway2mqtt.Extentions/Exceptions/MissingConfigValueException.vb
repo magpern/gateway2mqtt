@@ -2,9 +2,8 @@
 Imports System.Runtime.Serialization
 
 Namespace Exceptions
-
-    <Serializable>
     <ExcludeFromCodeCoverage>
+    <Serializable>
     Public Class MissingConfigValueException
         Inherits Exception
 

@@ -2,7 +2,7 @@
 Imports System.Runtime.Serialization
 
 Namespace Exceptions
-    <ExcludeFromCodeCoverage> _
+    <ExcludeFromCodeCoverage> 
     <Serializable>
     Public Class DeviceIgnoredException
         Inherits Exception
