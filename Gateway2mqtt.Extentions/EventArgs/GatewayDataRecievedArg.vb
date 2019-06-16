@@ -1,4 +1,7 @@
-﻿Namespace EventArgs
+﻿Imports System.Diagnostics.CodeAnalysis
+
+Namespace EventArgs
+    <ExcludeFromCodeCoverage>
     Public Class GatewayDataRecievedArg
         Inherits System.EventArgs
 
