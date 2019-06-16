@@ -1,5 +1,8 @@
-﻿
+﻿Imports System.Diagnostics.CodeAnalysis
+
 Namespace EventArgs
+
+    <ExcludeFromCodeCoverage>
     Public Class GatewayConnectionStateArg
         Inherits System.EventArgs
 
