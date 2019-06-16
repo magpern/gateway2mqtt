@@ -15,6 +15,16 @@ Public Class MessageConverterTest
     End Sub
 
     <TestCase>
+    Public Sub ConstructorTest()
+        'Arrange
+        Dim obj = new MessageConverter(Mock.Of(Of ILogger(Of MessageConverter)),TestHelper.CreateMockConfig.Object)
+
+        'Assert
+        Assert.IsNotNull(obj)
+
+    End Sub
+
+    <TestCase>
     Public Sub Temp_and_Humidity_message_from_RFLink_to_mqtt2gateway_json()
         'Arrange
         'Setup of Shared/Static objects in MessageConverter is made in <SetUp>

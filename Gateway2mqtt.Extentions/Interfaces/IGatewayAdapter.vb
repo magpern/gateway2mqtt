@@ -1,4 +1,6 @@
 ﻿
+Imports com.magpern.gateway2mqtt.Extentions.EventArgs
+
 Namespace Interfaces
     Public Interface IGatewayAdapter
         'Property ServiceProvider As ServiceProvider
@@ -6,7 +8,6 @@ Namespace Interfaces
         Event DataReceived(sender As IGatewayAdapter, e As GatewayDataRecievedArg)
 
         'Function RequestGatewayVerionAsync() As Task(Of IgatewayVersion)
-        Function DataSendAsync(dataPayload As DataPayload) As Task
         Function StartAdapter() As Task
         Sub StopAdapter()
     End Interface

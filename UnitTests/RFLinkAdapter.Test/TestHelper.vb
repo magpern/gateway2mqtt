@@ -3,6 +3,7 @@ Imports Moq
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces 
 
 Public MustInherit Class TestHelper
+
     Public Shared Function CreateMockConfig As Mock(Of IRFLinkConfig)
         Dim config = New Mock(Of IRFLinkConfig)()
         config.Setup(function(s) s.MqttHost).Returns("mqtt.home")

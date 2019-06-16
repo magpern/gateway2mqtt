@@ -1,6 +1,8 @@
+Imports System.Diagnostics.CodeAnalysis
 Imports System.Runtime.Loader
 Imports System.Threading
 Imports com.magpern.gateway2mqtt.Extentions
+Imports com.magpern.gateway2mqtt.Extentions.EventArgs
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.Extensions.Logging
@@ -13,10 +15,10 @@ Public Class Program
 
     Private Shared _logger As ILogger
     Private Shared ReadOnly _closing As New AutoResetEvent(False)
-    Private Shared RunningThreads As New List(Of IGatewayAdapter)
     Private Shared _mqttConnection As IMqttClient
     Private Shared ReadOnly cts As New CancellationTokenSource()
 
+    <ExcludeFromCodeCoverage> _
     Public Shared Sub Main(ByVal args As String())
         AddHandler AppDomain.CurrentDomain.ProcessExit, AddressOf CurrentDomain_ProcessExit
         AddHandler AssemblyLoadContext.Default.Unloading, AddressOf Default_Unloading
@@ -24,6 +26,7 @@ Public Class Program
         MainAsync(args, cts.Token).GetAwaiter.GetResult 
     End Sub
 
+    <ExcludeFromCodeCoverage> _
     Private Shared Async Function MainAsync(ByVal args As String(), ByVal token As CancellationToken) As Task
         
         Dim serviceCollection = New ServiceCollection()
@@ -62,9 +65,10 @@ Public Class Program
     End Sub
 
     Private Shared Sub DataProcessor(sender As Object, e As GatewayDataRecievedArg)
-        _logger.LogTrace(e.Payload.message)
+        _logger.LogTrace(e.Payload.message.Payload)
     End Sub
 
+    <ExcludeFromCodeCoverage> _
     Private Shared Sub ConfigureServices(ByVal services As IServiceCollection)
         services.AddLogging(Function(configure) configure.AddConsole()) _
             .Configure(New Action(Of LoggerFilterOptions)(Sub(x) x.MinLevel = Loglevel)) _
@@ -72,18 +76,21 @@ Public Class Program
             .AddSingleton(Of IConfig, Config).AddSingleton(Of IRFLinkConfig, RFLinkConfig)
     End Sub
 
+    <ExcludeFromCodeCoverage> _
     Private Shared Sub Default_Unloading(obj As AssemblyLoadContext)
         System.Console.WriteLine("unload")
         _closing.Set()
         cts.CancelAfter(300)
     End Sub
 
-    Private Shared Sub CurrentDomain_ProcessExit(sender As Object, e As EventArgs)
+    <ExcludeFromCodeCoverage> _
+    Private Shared Sub CurrentDomain_ProcessExit(sender As Object, e As System.EventArgs)
         System.Console.WriteLine("process exit")
         _closing.Set()
         cts.CancelAfter(300)
     End Sub
 
+    <ExcludeFromCodeCoverage> _
     Private Shared Sub OnExit(sender As Object, args As ConsoleCancelEventArgs)
         _logger.LogInformation("OnExit is triggered. Initiating shutdown")
         args.Cancel = True

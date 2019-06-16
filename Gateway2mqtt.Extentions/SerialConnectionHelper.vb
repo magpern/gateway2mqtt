@@ -1,19 +1,7 @@
 ﻿Imports System.IO.Ports
 
-Public Class SerialConnection
-    Protected ComPort As SerialPort
-
-    Protected [Continue] As Boolean
-
-    Protected Property Port As String = "COM6"
-    Protected Property BaudRate As Integer = 57600
-    Protected Property DataBit As Integer = 8
-    Protected Property Parity As SerialParity = SerialParity.None
-    Protected Property StopBit As SerialStopBits = SerialStopBits.One
-    Protected Property ReadTimeout As Integer = 500
-    Protected Property WriteTimeout As Integer = 500
-
-    Protected Enum SerialParity
+Public MustInherit Class SerialConnectionHelper
+    Public Enum SerialParity
         '
         ' Summary:
         '     No parity check occurs.
@@ -36,7 +24,7 @@ Public Class SerialConnection
         Space = 4
     End Enum
 
-    Protected Enum SerialStopBits
+    Public Enum SerialStopBits
         ' <summary>No stop bits are used. This value Is Not supported by the <see cref="P:System.IO.Ports.SerialPort.StopBits"></see> property.</summary>
         ' <returns></returns>
         None
@@ -51,7 +39,7 @@ Public Class SerialConnection
         OnePointFive
     End Enum
 
-    Protected Shared Function MapStopBits(bit As SerialStopBits) As StopBits
+    Public Shared Function MapStopBits(bit As SerialStopBits) As StopBits
         Select Case bit
             Case SerialStopBits.None
                 Return StopBits.None
@@ -66,7 +54,7 @@ Public Class SerialConnection
         End Select
     End Function
 
-    Protected Shared Function MapParity(parityValue As SerialParity) As Parity
+    Public Shared Function MapParity(parityValue As SerialParity) As Parity
         Select Case parityvalue
             Case SerialParity.Even
                 Return System.IO.Ports.Parity.Even

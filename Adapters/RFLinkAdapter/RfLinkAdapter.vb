@@ -1,18 +1,30 @@
+Imports System.Diagnostics.CodeAnalysis
 Imports System.IO.Ports
 Imports System.Threading
 Imports System.Timers
 Imports com.magpern.gateway2mqtt.Extentions
 Imports com.magpern.gateway2mqtt.Extentions.AsyncExtensions
+Imports com.magpern.gateway2mqtt.Extentions.EventArgs
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 Imports Microsoft.Extensions.Logging
 
 Public Class RfLinkAdapter
-    Inherits SerialConnection
-    Implements IGatewayAdapter
+    Inherits SerialConnectionHelper
+    Implements IGatewayAdapter, ISerialConnection
 
     Public Shared Property Logger As ILogger
     Public Shared Property Config As IRfLinkConfig
     Public Shared Property ReadThread As Thread
+
+    Public Property ComPort As SerialPort Implements ISerialConnection.ComPort
+    Public Property DoContinue As Boolean Implements ISerialConnection.DoContinue
+    Public Property Port As String = "COM6" Implements ISerialConnection.Port
+    Public Property BaudRate As Integer = 57600 Implements ISerialConnection.BaudRate
+    Public Property DataBit As Integer = 8 Implements ISerialConnection.DataBit
+    Public Property Parity As SerialParity = SerialParity.None Implements ISerialConnection.Parity
+    Public Property StopBit As SerialStopBits = SerialStopBits.One Implements ISerialConnection.StopBit
+    Public Property ReadTimeout As Integer = 500 Implements ISerialConnection.ReadTimeout
+    Public Property WriteTimeout As Integer = 500 Implements ISerialConnection.WriteTimeout
 
     Public Sub New(log As ILogger(Of IGatewayAdapter), conf As IRfLinkConfig)
         Logger = log
@@ -25,13 +37,15 @@ Public Class RfLinkAdapter
     Public Event ConnectionState(sender As IGatewayAdapter, e As GatewayConnectionStateArg) _
         Implements IGatewayAdapter.ConnectionState
 
+    <ExcludeFromCodeCoverage> _
     Public Sub StopAdapter() Implements IGatewayAdapter.StopAdapter
-        [Continue] = False
+        DoContinue = False
         Thread.Sleep(1)
         ReadThread.Join()
         ComPort.Close()
     End Sub
 
+    <ExcludeFromCodeCoverage> _
     Private Async Sub ReadAsync()
 
         Dim aTimer = New Timers.Timer(60000)
@@ -41,7 +55,7 @@ Public Class RfLinkAdapter
         aTimer.Enabled = True
 
         Try
-            While [Continue]
+            While DoContinue
                 Try
                     Dim message As String = Await ComPort.ReadLineAsync
                     Await ProcessMessageAsync(message)
@@ -57,11 +71,11 @@ Public Class RfLinkAdapter
         End Try
     End Sub
 
-    Private Async Function ProcessMessageAsync(message As String) As Task
+    Public Async Function ProcessMessageAsync(message As String) As Task
         Await Task.Factory.StartNew(Sub() ProcessMessage(message))
     End Function
 
-    Private Async Sub ProcessMessage(message As String)
+    Public Async Sub ProcessMessage(message As String)
         Dim result = MessageConverter.DecodeRawMessage(message)
         Logger.LogDebug($"Recieved {result.Count} messages to process for queue")
         For Each cmd As Dictionary(Of String, String) In result
@@ -90,10 +104,10 @@ Public Class RfLinkAdapter
         })
     End Function
 
-
+    <ExcludeFromCodeCoverage> _
     Private Async Function StartAdapter() As Task Implements IGatewayAdapter.StartAdapter
         OpenComPort()
-        [Continue] = True
+        DoContinue = True
 
         Await ComPort.BaseStream.FlushAsync
         ComPort.RtsEnable = False
@@ -105,6 +119,7 @@ Public Class RfLinkAdapter
         RaiseEvent ConnectionState(Me, New GatewayConnectionStateArg(Extentions.ConnectionState.Online))
     End Function
 
+    <ExcludeFromCodeCoverage> _
     Private Sub OpenComPort()
         ComPort = New SerialPort(Config.RflinkTtyDevice, BaudRate, MapParity(Parity), DataBit, MapStopBits(StopBit)) _
             With {
@@ -124,15 +139,12 @@ Public Class RfLinkAdapter
         Loop While Not ComPort.IsOpen
     End Sub
 
-    Private Async Sub OnTimedEventAsync(sender As Object, e As ElapsedEventArgs)
+    <ExcludeFromCodeCoverage> _
+    Public Async Sub OnTimedEventAsync(sender As Object, e As ElapsedEventArgs)
         If ComPort.IsOpen Then
             Logger.LogTrace("Heartbeat" + e.SignalTime.ToString)
             Await ComPort.WriteLineAsync("10;PING;")
         End If
     End Sub
-
-    Public Function DataSendAsync(dataPayload As DataPayload) As Task Implements IGatewayAdapter.DataSendAsync
-        Throw New NotImplementedException()
-    End Function
 
 End Class

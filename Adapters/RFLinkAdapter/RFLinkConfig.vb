@@ -1,7 +1,7 @@
 ﻿Imports com.magpern.gateway2mqtt.Extentions
 Imports com.magpern.gateway2mqtt.Extentions.Interfaces
 
-Public Class RFLinkConfig
+Public Class RfLinkConfig
     Inherits Config
     Implements IRFLinkConfig
 
